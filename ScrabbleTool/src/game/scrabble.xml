@@ -1,0 +1,47 @@
+<game>
+  <tiles>
+    <letter text="A" value="1" />
+    <letter text="B" value="3" />
+    <letter text="C" value="3" />
+    <letter text="D" value="2" />
+    <letter text="E" value="1" />
+    <letter text="F" value="4" />
+    <letter text="G" value="2" />
+    <letter text="H" value="4" />
+    <letter text="I" value="1" />
+    <letter text="J" value="8" />
+    <letter text="K" value="5" />
+    <letter text="L" value="1" />
+    <letter text="M" value="3" />
+    <letter text="N" value="1" />
+    <letter text="O" value="1" />
+    <letter text="P" value="3" />
+    <letter text="Q" value="10" />
+    <letter text="R" value="1" />
+    <letter text="S" value="1" />
+    <letter text="T" value="1" />
+    <letter text="U" value="1" />
+    <letter text="V" value="4" />
+    <letter text="W" value="4" />
+    <letter text="X" value="8" />
+    <letter text="Y" value="4" />
+    <letter text="Z" value="10" />
+  </tiles>
+  <dictionary filename="twl06.txt" />
+  <modifiers>
+    <modifier name="TW" type="wordscore" magnitude="3" />
+    <modifier name="DW" type="wordscore" magnitude="2" />
+    <modifier name="TL" type="letterscore" magnitude="3" />
+    <modifier name="DL" type="letterscore" magnitude="2" />
+  </modifiers>
+  <board size="15" startrow="7" startcol="7">
+    <modifier row="0" col="0" name="TW" />
+    <modifier row="0" col="7" name="TW" />
+    <modifier row="0" col="14" name="TW" />
+    <modifier row="7" col="0" name="TW" />
+    <modifier row="7" col="14" name="TW" />
+    <modifier row="14" col="0" name="TW" />
+    <modifier row="14" col="7" name="TW" />
+    <modifier row="14" col="14" name="TW" />
+  </board>
+</game>
