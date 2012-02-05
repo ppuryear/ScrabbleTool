@@ -46,4 +46,20 @@ public class Letter implements Comparable<Letter> {
   public int compareTo(Letter other) {
     return text_.compareTo(other.text_);
   }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other)
+      return true;
+    if (!(other instanceof Letter))
+      return false;
+
+    Letter otherLetter = (Letter) other;
+    return text_.equals(otherLetter.text_);
+  }
+
+  @Override
+  public int hashCode() {
+    return text_.hashCode();
+  }
 }

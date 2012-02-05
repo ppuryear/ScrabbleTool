@@ -1,7 +1,9 @@
 package scrabbletool.game;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,7 +13,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import scrabbletool.FileUtilities;
 import scrabbletool.ScrabbleTool;
 import scrabbletool.gaddag.GADDAG;
 import scrabbletool.gaddag.GADDAGFactory;
@@ -20,7 +21,6 @@ import scrabbletool.game.XMLUtilities.XMLSyntaxException;
 import scrabbletool.game.board.Board;
 import scrabbletool.game.board.Board.BoardParameterException;
 import scrabbletool.game.board.Modifier;
-import scrabbletool.game.board.Modifiers;
 
 /**
  * This class is responsible for the creation of {@link Game} objects.
@@ -28,12 +28,12 @@ import scrabbletool.game.board.Modifiers;
  * @author Philip Puryear
  */
 public class GameFactory {
-  private static Map<String, Class<? extends Modifier>> modifierClassMap_;
+  private static Map<String, Modifier.Type> modifierTypeMap_;
 
   static {
-    modifierClassMap_ = new TreeMap<String, Class<? extends Modifier>>();
-    modifierClassMap_.put("wordscore", Modifiers.WordScoreModifier.class);
-    modifierClassMap_.put("letterscore", Modifiers.LetterScoreModifier.class);
+    modifierTypeMap_ = new TreeMap<String, Modifier.Type>();
+    modifierTypeMap_.put("letterscore", Modifier.Type.LETTER_SCORE);
+    modifierTypeMap_.put("wordscore", Modifier.Type.WORD_SCORE);
   }
 
   /**
@@ -45,15 +45,15 @@ public class GameFactory {
    * @throws WordSizeException If the dictionary used by the file contains a
    *           word of length < 2.
    */
-  public static Game newGame(File gameTypeFile) throws IOException,
+  public static Game newGame(Path gameTypeFile) throws IOException,
                                                XMLSyntaxException,
                                                WordSizeException {
     // Parse the game file into an XML document object.
     Document gameDoc = null;
-    try {
+    try (InputStream gameTypeFileIS = Files.newInputStream(gameTypeFile)) {
       DocumentBuilder db = DocumentBuilderFactory.newInstance()
                                                  .newDocumentBuilder();
-      gameDoc = db.parse(gameTypeFile);
+      gameDoc = db.parse(gameTypeFileIS);
     } catch (ParserConfigurationException e) {
       // Shouldn't happen, since we're using the default parser configuration.
       e.printStackTrace();
@@ -129,8 +129,7 @@ public class GameFactory {
     String dictFileName = dictElement.getAttribute("filename");
     if (dictFileName.isEmpty())
       throw new XMLSyntaxException(dictElement);
-    File dictFile = FileUtilities.getDescendant(ScrabbleTool.DICTIONARY_FOLDER,
-                                                dictFileName);
+    Path dictFile = ScrabbleTool.DICTIONARY_FOLDER.resolve(dictFileName);
     return GADDAGFactory.newGADDAG(dictFile, alphabet);
   }
 
@@ -202,20 +201,12 @@ public class GameFactory {
 
       // Extract the modifier type.
       String type = modifierElement.getAttribute("type");
-      Class<? extends Modifier> modifierClass = modifierClassMap_.get(type);
-      if (modifierClass == null || identifier.isEmpty())
+      Modifier.Type modifierType = modifierTypeMap_.get(type);
+      if (modifierType == null || identifier.isEmpty())
         throw new XMLSyntaxException(modifierElement);
 
       // Instantiate the modifier.
-      Modifier modifier = null;
-      try {
-        modifier = modifierClass.getConstructor(int.class)
-                                .newInstance(magnitude);
-      } catch (Exception e) {
-        // Any exception thrown here represents a bug.
-        e.printStackTrace();
-        continue;
-      }
+      Modifier modifier = new Modifier(modifierType, magnitude);
       modifiers.put(identifier, modifier);
     }
     return modifiers;

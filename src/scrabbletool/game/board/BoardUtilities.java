@@ -1,6 +1,4 @@
-package scrabbletool.game.movegen;
-
-import scrabbletool.game.board.Board;
+package scrabbletool.game.board;
 
 /**
  * Useful board-related functions for use in move generation.
@@ -23,10 +21,9 @@ public class BoardUtilities {
   public static final int RIGHT = 1;
 
   /**
-   * Finds the boundary (i.e. the first empty column in some direction) of a
-   * word on the board. The direction is determined by the {@code dir}
-   * parameter: if the left boundary is desired, use {@link #LEFT}; if the right
-   * boundary is desired, use {@link #RIGHT}.
+   * Finds the boundary of a word on the board. The direction is determined by
+   * the {@code dir} parameter: if the left boundary is desired, use
+   * {@link #LEFT}; if the right boundary is desired, use {@link #RIGHT}.
    * 
    * @param board The board to use.
    * @param row The row that the word is located on.
@@ -39,18 +36,9 @@ public class BoardUtilities {
                                      int internalPos,
                                      int dir) {
     int col = internalPos;
-    while (onBoard(board, col) && board.get(row, col).getTile() != null)
+    while (board.isValidPosition(row, col)
+           && board.get(row, col).getTile() != null)
       col += dir;
-    return col;
-  }
-
-  /**
-   * Returns true if and only if the given column is inside the board.
-   * 
-   * @param board The board to use.
-   * @param col The column number to test.
-   */
-  public static boolean onBoard(Board board, int col) {
-    return (col >= 0 && col < board.size());
+    return col - dir;
   }
 }

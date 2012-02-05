@@ -1,23 +1,49 @@
 package scrabbletool.game.board;
 
 /**
- * A Scrabble score modifier. Each modifier has a <em>magnitude</em>, an integer
- * whose specific meaning depends on the subclass. (For instance, the magnitude
- * of a {@link WordScoreModifier} refers to the word score multiplication
- * factor.)
+ * A Scrabble score modifier. Each modifier has a <em>magnitude</em> and a
+ * {@link Type}.
  * 
  * @author Philip Puryear
  */
-public abstract class Modifier {
+public class Modifier {
+  /**
+   * This class enumerates all modifier types.
+   * 
+   * @see Type#LETTER_SCORE
+   * @see Type#WORD_SCORE
+   */
+  public static enum Type {
+    /**
+     * A letter score modifier.
+     */
+    LETTER_SCORE,
+
+    /**
+     * A word score modifier.
+     */
+    WORD_SCORE
+  }
+
+  private Type type_;
   private int magnitude_;
 
   /**
-   * Constructs a new modifier with the given magnitude.
+   * Constructs a new modifier.
    * 
+   * @param type The {@link Type} of modifier.
    * @param magnitude The magnitude of this modifier.
    */
-  public Modifier(int magnitude) {
+  public Modifier(Type type, int magnitude) {
+    type_ = type;
     magnitude_ = magnitude;
+  }
+
+  /**
+   * Returns the type of this modifier.
+   */
+  public Type getType() {
+    return type_;
   }
 
   /**

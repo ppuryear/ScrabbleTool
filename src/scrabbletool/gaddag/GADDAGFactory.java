@@ -1,9 +1,9 @@
 package scrabbletool.gaddag;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import scrabbletool.game.Alphabet;
@@ -38,13 +38,9 @@ public class GADDAGFactory {
    * @throws WordSizeException If the dictionary file contains a word whose
    *           length is less than 2.
    */
-  public static GADDAG newGADDAG(File dictFile, Alphabet alphabet) throws IOException,
+  public static GADDAG newGADDAG(Path dictFile, Alphabet alphabet) throws IOException,
                                                                   WordSizeException {
-    List<String> words = new ArrayList<String>();
-    BufferedReader reader = new BufferedReader(new FileReader(dictFile));
-    while (reader.ready())
-      words.add(reader.readLine());
-    reader.close();
+    List<String> words = Files.readAllLines(dictFile, StandardCharsets.UTF_8);
 
     GADDAG gaddag = new GADDAG();
     for (int i = 0; i < words.size(); i++) {

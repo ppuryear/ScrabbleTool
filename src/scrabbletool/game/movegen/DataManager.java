@@ -5,10 +5,11 @@ import java.util.Set;
 import scrabbletool.Transposable2DArray;
 import scrabbletool.gaddag.Arc;
 import scrabbletool.gaddag.GADDAG;
-import scrabbletool.game.Game;
+import scrabbletool.game.Alphabet;
 import scrabbletool.game.Letter;
 import scrabbletool.game.Move;
 import scrabbletool.game.board.Board;
+import scrabbletool.game.board.BoardUtilities;
 import scrabbletool.game.board.Tile;
 
 /**
@@ -28,16 +29,16 @@ class DataManager {
    * 
    * @param game The game to be played.
    */
-  public DataManager(Game game) {
-    board_ = game.getBoard();
-    gaddag_ = game.getGADDAG();
+  public DataManager(Board board, GADDAG gaddag, Alphabet alphabet) {
+    board_ = board;
+    gaddag_ = gaddag;
 
     // Instantiate an array of |SquareData|.
     int boardSize = board_.size();
     squareData_ = new Transposable2DArray<SquareData>(boardSize, boardSize);
     for (int i = 0; i < boardSize - 1; i++) {
       for (int j = 0; j < boardSize - 1; j++)
-        squareData_.set(i, j, new SquareData(game.getAlphabet().getLetters()));
+        squareData_.set(i, j, new SquareData(alphabet.getLetters()));
     }
     anchorUpdater_ = new AnchorUpdater();
     crossSetUpdater_ = new CrossSetUpdater();
@@ -103,13 +104,13 @@ class DataManager {
 
       // Update the anchors on the square immediately left of the play.
       int wordLeftBound = BoardUtilities.findWordBoundary(board_, row, col,
-                                                          BoardUtilities.LEFT);
+                                                          BoardUtilities.LEFT) - 1;
       if (wordLeftBound >= 0)
         updateAnchors(row, wordLeftBound);
 
       // Update the anchors on the square immediately right of the play.
       int wordRightBound = BoardUtilities.findWordBoundary(board_, row, col,
-                                                           BoardUtilities.RIGHT);
+                                                           BoardUtilities.RIGHT) + 1;
       if (wordRightBound < board_.size())
         updateAnchors(row, wordRightBound);
 
@@ -210,7 +211,7 @@ class DataManager {
       arc_ = gaddag_.getRootArc();
       row_ = row;
       int wordEnd = BoardUtilities.findWordBoundary(board_, row, letterPos,
-                                                    BoardUtilities.RIGHT) - 1;
+                                                    BoardUtilities.RIGHT);
       col_ = wordEnd;
 
       // Travel along the GADDAG to the left word boundary.
@@ -241,18 +242,11 @@ class DataManager {
                                         .getDownSet();
       crossSet.clear();
 
-      // Find out whether there are additional squares in the specified
-      // direction.
-      boolean roomInDir = false;
-      if (direction == BoardUtilities.LEFT)
-        roomInDir = col_ > 0;
-      else if (direction == BoardUtilities.RIGHT)
-        roomInDir = col_ < board_.size() - 1;
-
       // If there is no tile immediately to the (left or right, according to
       // |direction|), then the cross-set on this tile is equal to the
       // letter-set on the current arc.
-      if (!roomInDir || board_.get(row_, col_ + direction).getTile() == null) {
+      if (!board_.isValidPosition(row_, col_ + direction)
+          || board_.get(row_, col_ + direction).getTile() == null) {
         crossSet.addAll(arc_.getLetterSet());
       } else {
         // Otherwise, we must try every possible letter and see if we can reach
@@ -280,7 +274,7 @@ class DataManager {
      * @param dir The direction to traverse on the board.
      */
     private void traverseToWordBoundary(int dir) {
-      while (BoardUtilities.onBoard(board_, col_) && arc_ != null) {
+      while (board_.isValidPosition(row_, col_) && arc_ != null) {
         Tile tile = board_.get(row_, col_).getTile();
         if (tile == null)
           break;

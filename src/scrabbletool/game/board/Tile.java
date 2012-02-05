@@ -28,8 +28,41 @@ public class Tile implements Comparable<Tile> {
 
   @Override
   public int compareTo(Tile other) {
-    if (other instanceof Blank)
-      return -1;
-    return letter_.compareTo(other.letter_);
+    if (this.letter_ == null) {
+      if (other.letter_ == null)
+        return 0;
+      else
+        return 1;
+    } else {
+      if (other.letter_ == null)
+        return -1;
+      else
+        return letter_.compareTo(other.letter_);
+    }
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other)
+      return true;
+    if (!(other instanceof Tile))
+      return false;
+
+    Tile otherTile = (Tile) other;
+    if (this.letter_ == null) {
+      if (otherTile.letter_ == null)
+        return true;
+    } else {
+      if (otherTile.letter_ != null)
+        return letter_.equals(otherTile.letter_);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (letter_ == null)
+      return 0;
+    return letter_.hashCode();
   }
 }

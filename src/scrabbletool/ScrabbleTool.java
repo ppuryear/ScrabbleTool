@@ -1,10 +1,11 @@
 package scrabbletool;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import scrabbletool.game.Game;
 import scrabbletool.game.GameFactory;
 import scrabbletool.ui.UI;
@@ -21,17 +22,17 @@ public class ScrabbleTool {
   /**
    * The base directory of the ScrabbleTool program.
    */
-  public static final File BASE_DIRECTORY;
+  public static final Path BASE_DIRECTORY;
 
   /**
    * The folder that the dictionaries are stored in.
    */
-  public static final File DICTIONARY_FOLDER;
+  public static final Path DICTIONARY_FOLDER;
 
   /**
    * The folder that the game-type descriptor files are stored in.
    */
-  public static final File GAMETYPE_FOLDER;
+  public static final Path GAMETYPE_FOLDER;
 
   /**
    * The file extension of the game descriptor file.
@@ -40,10 +41,8 @@ public class ScrabbleTool {
 
   static {
     BASE_DIRECTORY = getBaseDirectory();
-    DICTIONARY_FOLDER = FileUtilities.getDescendant(BASE_DIRECTORY,
-                                                    DICTIONARY_FOLDER_NAME);
-    GAMETYPE_FOLDER = FileUtilities.getDescendant(BASE_DIRECTORY,
-                                                  GAMETYPES_FOLDER_NAME);
+    DICTIONARY_FOLDER = BASE_DIRECTORY.resolve(DICTIONARY_FOLDER_NAME);
+    GAMETYPE_FOLDER = BASE_DIRECTORY.resolve(GAMETYPES_FOLDER_NAME);
   }
 
   /**
@@ -60,10 +59,8 @@ public class ScrabbleTool {
     }
 
     // Find the game descriptor file.
-    String gametypeFilename = Preferences.getPreference(Preferences.Keys.GAMETYPE)
-                              + GAMETYPE_FILE_EXTENSION;
-    File gameTypeFile = FileUtilities.getDescendant(GAMETYPE_FOLDER,
-                                                    gametypeFilename);
+    Path gameTypeFile = GAMETYPE_FOLDER.resolve(Preferences.get(Preferences.GAMETYPE)
+                                                + GAMETYPE_FILE_EXTENSION);
 
     // Instantiate a new game.
     Game game = null;
@@ -84,18 +81,18 @@ public class ScrabbleTool {
   /**
    * Returns the program's working directory.
    */
-  private static File getBaseDirectory() {
-    File baseDir = null;
+  private static Path getBaseDirectory() {
+    Path baseDir = null;
     try {
-      URL fileURL = ScrabbleTool.class.getProtectionDomain()
-                                      .getCodeSource()
+      URL fileURL = ScrabbleTool.class.getProtectionDomain().getCodeSource()
                                       .getLocation();
-      URI fileURI = fileURL.toURI();
-      baseDir = new File(fileURI);
-    } catch (URISyntaxException e) {
-      // We should never get here since we let Java supply the URI.
-      e.printStackTrace();
+      baseDir = Paths.get(fileURL.toURI()).toRealPath();
+    } catch (URISyntaxException | IOException e) {
+      // We should never get here since we let Java supply the URL.
+      throw new RuntimeException(e);
     }
+    if (!Files.isDirectory(baseDir))
+      baseDir = baseDir.getParent();
     return baseDir;
   }
 }

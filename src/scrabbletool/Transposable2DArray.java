@@ -48,6 +48,20 @@ public class Transposable2DArray<T extends Transposable<T>> extends
   }
 
   @Override
+  public Transposable2DArray<T> subArray(int rowMin,
+                                         int rowMax,
+                                         int colMin,
+                                         int colMax) {
+    TwoDimensionalArray<T> rowSubArray = super.subArray(rowMin, rowMax, colMin,
+                                                        colMax);
+    TwoDimensionalArray<T> colSubArray = transposedArray_.subArray(colMin,
+                                                                   colMax,
+                                                                   rowMin,
+                                                                   rowMax);
+    return new Transposable2DArray<T>(rowSubArray, colSubArray);
+  }
+
+  @Override
   public T set(int row, int col, T element) {
     // We need to place this element into both the row- and column-major-ordered
     // arrays.

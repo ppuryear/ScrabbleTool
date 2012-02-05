@@ -8,7 +8,8 @@ public class UI {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
-      // If there's no system look and feel, just use the default.
+      // getSystemLookAndFeelClassName() should always return a valid LAF.
+      throw new RuntimeException(e);
     }
 
     SwingUtilities.invokeLater(new Runnable() {

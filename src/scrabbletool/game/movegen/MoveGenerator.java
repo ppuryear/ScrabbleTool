@@ -1,5 +1,6 @@
 package scrabbletool.game.movegen;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,9 +23,10 @@ import scrabbletool.game.board.Tile;
  */
 public class MoveGenerator {
   private DataManager dataManager_;
+  private Game game_;
   private Board board_;
   private GADDAG gaddag_;
-  private List<Move> moves_;
+  private Set<Move> moves_;
   private int anchorRow_;
   private int anchorCol_;
   private boolean transposed_;
@@ -34,33 +36,12 @@ public class MoveGenerator {
    * 
    * @param game The game to be played.
    */
-  public MoveGenerator(Game game) {
-    dataManager_ = new DataManager(game);
+  public MoveGenerator(Game game, GADDAG gaddag) {
+    dataManager_ = new DataManager(game.getBoard(), gaddag, game.getAlphabet());
+    game_ = game;
     board_ = game.getBoard();
-    gaddag_ = game.getGADDAG();
+    gaddag_ = gaddag;
     transposed_ = false;
-  }
-
-  /**
-   * Finds all valid scrabble moves that can be played using the tiles in the
-   * specified rack.
-   * 
-   * @param rack A list of {@link Tile}s that comprise the player's rack.
-   * @return A list of all valid moves.
-   */
-  public List<Move> generate(List<Tile> rack) {
-    moves_ = new LinkedList<Move>();
-
-    // Generate all across moves.
-    generateAcrossMoves(rack);
-
-    // Generate all down moves by transposing the board.
-    transpose();
-    generateAcrossMoves(rack);
-
-    // Restore the board's original orientation.
-    transpose();
-    return moves_;
   }
 
   /**
@@ -72,6 +53,27 @@ public class MoveGenerator {
    */
   public void update(Move move) {
     dataManager_.update(move);
+  }
+
+  /**
+   * Finds all valid scrabble moves that can be played using the tiles in the
+   * specified rack.
+   * 
+   * @param rack A list of {@link Tile}s that comprise the player's rack.
+   * @return A list of all valid moves.
+   */
+  private void generate(List<Tile> rack) {
+    moves_ = new HashSet<Move>();
+
+    // Generate all across moves.
+    generateAcrossMoves(rack);
+
+    // Generate all down moves by transposing the board.
+    transpose();
+    generateAcrossMoves(rack);
+
+    // Restore the board's original orientation.
+    transpose();
   }
 
   /**

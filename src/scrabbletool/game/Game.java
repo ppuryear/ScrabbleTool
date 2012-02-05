@@ -32,7 +32,18 @@ public class Game {
    * Starts a new game.
    */
   public void newGame() {
-    moveGen_ = new MoveGenerator(this);
+  }
+
+  public boolean isValidMove(Move move) {
+    return false;
+  }
+
+  public void playMove(Move move) {
+    if (!isValidMove(move))
+      return; // Should throw something.
+
+    board_.playMove(move);
+    moveGen_.update(move);
   }
 
   /**
@@ -47,12 +58,5 @@ public class Game {
    */
   public Alphabet getAlphabet() {
     return alphabet_;
-  }
-
-  /**
-   * Returns the {@link GADDAG} used by this game.
-   */
-  public GADDAG getGADDAG() {
-    return gaddag_;
   }
 }

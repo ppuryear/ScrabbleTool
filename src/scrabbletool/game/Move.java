@@ -64,4 +64,65 @@ public class Move {
   public void addTile(Tile tile, int pos) {
     tileMap_.put(pos, tile);
   }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other)
+      return true;
+    if (!(other instanceof Move))
+      return false;
+
+    Move otherMove = (Move) other;
+
+    // Special case: if both tile maps are empty, then both moves are equal (an
+    // empty tile map represents a "no-op" move).
+    if (this.tileMap_.isEmpty() && otherMove.tileMap_.isEmpty())
+      return true;
+
+    // Special case: if both moves involve only one tile, then only the location
+    // of that tile matters (the across/down distinction is irrelevant).
+    if (this.tileMap_.size() == 1 && otherMove.tileMap_.size() == 1)
+      return singleTileMoveEquals(otherMove);
+
+    // General case: compare all members.
+    if (this.across_ != otherMove.across_)
+      return false;
+    if (this.rowOrCol_ != otherMove.rowOrCol_)
+      return false;
+    if (!this.tileMap_.equals(otherMove.tileMap_))
+      return false;
+    return true;
+  }
+
+  /**
+   * Returns true if and only if the given single-tile move represents the same
+   * move as this single-tile move.
+   */
+  private boolean singleTileMoveEquals(Move other) {
+    Map.Entry<Integer, Tile> mapEntry = tileMap_.entrySet().iterator().next();
+    int thisRow = across_ ? rowOrCol_ : mapEntry.getKey();
+    int thisCol = across_ ? mapEntry.getKey() : rowOrCol_;
+    Tile thisTile = mapEntry.getValue();
+
+    mapEntry = other.tileMap_.entrySet().iterator().next();
+    int otherRow = other.across_ ? other.rowOrCol_ : mapEntry.getKey();
+    int otherCol = other.across_ ? mapEntry.getKey() : other.rowOrCol_;
+    Tile otherTile = mapEntry.getValue();
+
+    if (!thisTile.equals(otherTile))
+      return false;
+    if (thisRow != otherRow)
+      return false;
+    if (thisCol != otherCol)
+      return false;
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = rowOrCol_ ^ tileMap_.hashCode();
+    if (!across_)
+      return -hashCode;
+    return hashCode;
+  }
 }
